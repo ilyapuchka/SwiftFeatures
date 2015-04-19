@@ -9,4 +9,6 @@ Contents:
 3. ~= operator
 4. Curried functions
 
+If you have something you'd like to share, pull requests are welcome.
+
 
