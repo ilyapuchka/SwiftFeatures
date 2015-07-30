@@ -151,6 +151,26 @@ Ilya
 growOlder(Marina)(5)
 Marina
 
+//: ### **Subscript with multiple parameters**
+//: Did you know that you can provide more that one paramtere to subscript?
+//: Also ++ will not just change returned value but will also write it back to that subscript.
 
+extension Dictionary {
+    subscript(key: Key, # or: Value) -> Value {
+        get {
+            return self[key] ?? or
+        }
+        set {
+            self[key] = newValue
+        }
+    }
+}
+
+var dict: [String: Int] = ["1": 1]
+dict["1"]?++
+dict
+
+dict["2", or: 3]++
+dict
 
 
