@@ -7,7 +7,7 @@
 //: ----
 //:
 //: ### **Var in for-in loop**
-//: If you have an array of reference type objects you can mutate them in a loop just adding var before loop veriable. This will work only for reference types as value types are copied on assignment and so the items in array will be not modified. If you have value types though you will be able to modify varable inside the loop. It will work pretty much like mutable function arguments.
+//: If you have an array of reference type objects you can mutate them in a loop just by adding var before loop variable. This will work only for reference types as value types are copied on assignment and so the items in array will be not modified. If you have value types though you will be able to modify loop variable inside the loop. It will work pretty much like mutable function arguments.
 
 class Box {
     var value: Int
@@ -16,28 +16,31 @@ class Box {
     }
 }
 
+
+
 var objectsArray = [Box(1), Box(2), Box(3)]
 for (var item) in objectsArray {
-    item.value++
+    ++item.value
 }
 objectsArray
 
 var valuesArray = [1, 2, 3]
-for (var item) in objectsArray {
-    item.value++
+for (var valueItem) in valuesArray {
+    ++valueItem
 }
+valuesArray
 
 //: ### **Property observers for local variables**
-//: This does not work in plyagrounds but give it a try in a real project and you will see "Will set 1" and "Did set 1".
+//: This does not work in plyagrounds but give it a try in a real project and you will see "Will set 1" and "Did set 1":
 
 func method() {
     
     var some: Int = 0 {
         willSet {
-            println("Will set \(newValue)")
+            print("Will set \(newValue)")
         }
         didSet {
-            println("Did set \(some)")
+            print("Did set \(some)")
         }
     }
     some = 1
@@ -46,14 +49,14 @@ func method() {
 method()
 
 //: ### **~= operator**
-//: You can use expression matching operator to find out if Range contains value. Also switch statement uses ~= operator for pattern matching.
+//: This is an expression matching operator. This is what switch statement uses for pattern matching. Outside switch you can use it i.e to find out if Range contains value.
 
 let some = 1
 if 0...5 ~= some {
-    println("\(some) is between 0 and 5")
+    print("\(some) is between 0 and 5")
 }
 
-//: You can override this operator like any other to crate some crazy things. Here are the [docs](https://developer.apple.com/library/prerelease/ios/documentation/Swift/Conceptual/Swift_Programming_Language/Patterns.html#//apple_ref/doc/uid/TP40014097-CH36-XID_909) for that operator.
+//: You can even override this operator like any other to crate some crazy things. Here are the [docs](https://developer.apple.com/library/prerelease/ios/documentation/Swift/Conceptual/Swift_Programming_Language/Patterns.html#//apple_ref/doc/uid/TP40014097-CH36-XID_909) for that operator.
 
 typealias Age = UInt
 
@@ -74,13 +77,6 @@ class Person {
         self.gender = gender
     }
     
-    func growOlder(years: Age) {
-        self.age += years
-    }
-}
-
-func ~=(pattern: Person, value: Person) -> Bool {
-    return pattern == value
 }
 
 func ==(lhs: Person, rhs: Person) -> Bool {
@@ -89,16 +85,18 @@ func ==(lhs: Person, rhs: Person) -> Bool {
 
 let Ilya = Person("Ilya", age: 28, gender: .Male)
 let Marina = Person("Marina", age: 27, gender: .Female)
-
 let me = Ilya
+
+func ~=(pattern: Person, value: Person) -> Bool {
+    return pattern == value
+}
 
 switch me {
 case Ilya:
-    println("Hi, man!")
+    print("Hi, man!")
 case Marina:
-    println("Hi, gorgeous!")
-default:
-    println()
+    print("Hi, gorgeous!")
+default: break
 }
 
 func ~=(pattern:Range<Age>, value: Person) -> Bool {
@@ -107,43 +105,36 @@ func ~=(pattern:Range<Age>, value: Person) -> Bool {
 
 switch me {
 case 0...18:
-    println("You can not drink beer yet")
-case 18...(UInt.max - 1):
-    println("Do what ever you want")
-default:
-    println()
+    print("You are too young for that")
+case 18..<UInt.max:
+    print("Do what ever you want")
+default: break
 }
 
-//: Unfortunatelly complier will not let you to match your class against tuple or enum, which would be cool, but you can still use ~= dircetly if you define it with tuple or enum as a pattern to match. To make it better you can swap right and left hand statements. But still I don't see very good usecases for that.
-
-func ~=(pattern: Gender, value: Person) -> Bool {
-    return pattern == value.gender
-}
-
-switch me {
-case me where .Male ~= me:
-    println("Hi, man!")
-case me where .Female ~= me:
-    println("Hi, gorgeous!")
-default:
-    println()
-}
+//: Unfortunatelly complier will not let you to match your class against tuple or enum, which would be cool. But you can still use ~= directly if you define it with tuple or enum as a pattern to match. To make it better swap right and left hand statements. This can be fun but I don't see very good usecases for that.
 
 func ~=(pattern: Person, value: Gender) -> Bool {
     return pattern.gender == value
 }
 
 switch me {
-case me where me ~= .Male:
-    println("Hi, man!")
-case me where me ~= .Female:
-    println("Hi, gorgeous!")
-default:
-    println()
+case _ where me ~= .Male:
+    print("Hi, man!")
+case _ where me ~= .Female:
+    print("Hi, gorgeous!")
+default: break
 }
 
 //: ### **Curried functions**
 //: Instance methods in Swift are actually curried functions. You can store it in variable and apply to different instances. Checkout [this post](http://oleb.net/blog/2014/07/swift-instance-methods-curried-functions/) by Ole Begemann for one of use cases for that feature.
+
+extension Person {
+    
+    func growOlder(years: Age) {
+        self.age += years
+    }
+    
+}
 
 let growOlder = Person.growOlder
 growOlder(Ilya)(5)
@@ -151,12 +142,12 @@ Ilya
 growOlder(Marina)(5)
 Marina
 
-//: ### **Subscript with multiple parameters**
-//: Did you know that you can provide more that one paramtere to subscript?
-//: Also ++ will not just change returned value but will also write it back to that subscript.
+
+//: ### **Subscript with multiple parameters (by [AirspeedVelocity](https://twitter.com/AirspeedSwift/status/626701244455895044))**
+//: Did you know that you can provide more that one paramtere to subscript? Also ++ will not just change returned value but will also write it back to that subscript. It's possible because subscript parameters are inout.
 
 extension Dictionary {
-    subscript(key: Key, # or: Value) -> Value {
+    subscript(key: Key, or or: Value) -> Value {
         get {
             return self[key] ?? or
         }
@@ -166,11 +157,14 @@ extension Dictionary {
     }
 }
 
-var dict: [String: Int] = ["1": 1]
-dict["1"]?++
+var dict = ["a": 1]
+dict["a"]?++
 dict
 
-dict["2", or: 3]++
+dict["b"]?++
+dict
+
+dict["c", or: 3]++
 dict
 
 
